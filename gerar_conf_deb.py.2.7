@@ -1,0 +1,69 @@
+#!/usr/bin/python
+#-=- encoding: latin-1 -=-
+
+from bd_deb_dhip import bd_deb_dhip
+from bd_select import bd_select
+
+arquivo = ''
+
+def gerar_conf_deb(recebe1,recebe2,recebe3):
+    arquivo = '# CONF DEBIAN - SOMENTE EDITAR NA INTERFACE  WEB - DHCPWEB\n%s' %recebe1
+    
+    # FUNÇÕES
+    arquivo += '' if(bd_select('c_dns_update','admconf') == "nao")\
+                    else "ddns-update-style interim\n%s" %recebe1
+                    
+    arquivo += '' if(bd_select('c_autoritario','admconf') == "nao")\
+                    else "authoritative\n%s" %recebe1
+                
+    arquivo += '' if(bd_select('c_bootp','admconf') == "nao")\
+                    else "allow bootp\n%s" %recebe1
+                
+    arquivo += '' if(bd_select('c_booting','admconf') == "nao")\
+                    else "allow booting\n%s" %recebe1            
+    # PXE
+    arquivo += '' if(bd_select('c_pxe_server','admconf') == "None")\
+                    else "siaddr %s\n%s" %(bd_select('c_pxe_server','admconf'),recebe1)
+                
+    arquivo += '' if(bd_select('c_pxe_filename','admconf') == "None")\
+                    else "boot_file %s\n%s" %(bd_select('c_pxe_filename','admconf'),recebe1)
+                
+    arquivo += '' if(bd_select('c_pxe_path','admconf') == "None")\
+                    else "option rootpath %s\n%s" %(bd_select('c_pxe_path','admconf'),recebe1)
+
+    # OPTION
+    arquivo += '' if(bd_select('c_name_servers','admconf') == "None")\
+                    else "option dns %s\n%s" %(bd_select('c_name_servers','admconf'),recebe1)
+                
+    arquivo += '' if(bd_select('c_subnet_mask','admconf') == "None")\
+                    else "option subnet %s\n%s" %(bd_select('c_subnet_mask','admconf'),recebe1)
+                
+    arquivo += '' if(bd_select('c_gateway','admconf') == "None")\
+                    else "option router %s\n%s" %(bd_select('c_gateway','admconf'),recebe1)
+                
+    arquivo += '' if(bd_select('c_netbios_name','admconf') == "None")\
+                    else "option wins %s\n%s" %(bd_select('c_netbios_name','admconf'),recebe1)
+                
+    arquivo += '' if(bd_select('c_domain_name','admconf') == "None")\
+                    else "option domain %s\n%s" %(bd_select('c_domain_name','admconf'),recebe1)
+
+    arquivo += '' if(bd_select('c_ntp','admconf') == "None")\
+                    else "option ntpsrv %s\n%s" %(bd_select('c_ntp','admconf'),recebe1)
+                
+    arquivo += '' if(bd_select('c_proxy_url','admconf') == "None")\
+                    else "option wpad %s\n%s" %(bd_select('c_proxy_url','admconf'),recebe1)
+
+    arquivo += '' if(bd_select('c_max_lease_time','admconf') == "None")\
+                    else "option lease %s\n%s" %(bd_select('c_max_lease_time','admconf'),recebe1)
+
+    # RANGE IP
+    arquivo += '' if(bd_select('c_range_inicio','admconf') == "None")\
+                    else "start %s\n%s" %(bd_select('c_range_inicio','admconf'),recebe1)
+    arquivo += '' if(bd_select('c_range_fim','admconf') == "None")\
+                    else "end %s\n%s" %(bd_select('c_range_fim','admconf'),recebe1)
+                
+
+    arquivo += "#STATIC\n%s" %recebe1
+    arquivo += bd_deb_dhip(recebe2,recebe3) + '\n' 
+
+    return arquivo

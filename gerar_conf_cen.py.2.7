@@ -1,0 +1,89 @@
+#!/usr/bin/python
+#-=- encoding: latin-1 -=-
+
+from bd_deb_dhip import bd_deb_dhip
+from bd_cen_dhip import bd_cen_dhip
+from bd_select import bd_select
+
+arquivo = ''
+
+def gerar_conf_cen(recebe1,recebe2,recebe3):
+    arquivo = '# CONF CENTOS - SOMENTE EDITAR NA INTERFACE  WEB - DHCPWEB\n%s' %recebe1
+    
+    # FUNÇÕES
+    arquivo += '' if(bd_select('c_dns_update','admconf') == "nao")\
+                    else "ddns-update-style interim;\n%s" %recebe1
+                    
+    arquivo += '' if(bd_select('c_autoritario','admconf') == "nao")\
+                    else "authoritative;\n%s" %recebe1
+                
+    arquivo += '' if(bd_select('c_bootp','admconf') == "nao")\
+                    else "allow bootp;\n%s" %recebe1
+                
+    arquivo += '' if(bd_select('c_booting','admconf') == "nao")\
+                    else "allow booting;\n%s" %recebe1 
+    
+    arquivo += """\noption wpad-url code 252 = text;\n\
+%soption option-128 code 128 = string;\n\
+%soption option-129 code 129 = text;%s\n\n""" %(recebe1,recebe1,recebe1)
+
+    recebe1
+
+    arquivo += '' if(bd_select('c_subnet','admconf') == "None")\
+                    else "subnet %s " %(bd_select('c_subnet','admconf'))
+                    
+    arquivo += '' if(bd_select('c_subnet_mask','admconf') == "None")\
+                    else "netmask %s {\n%s" %(bd_select('c_subnet_mask','admconf'),recebe1)                
+    
+    arquivo += '' if(bd_select('c_gateway','admconf') == "None")\
+                    else "option routers %s;\n%s" %(bd_select('c_gateway','admconf'),recebe1)
+    
+    arquivo += '' if(bd_select('c_subnet_mask','admconf') == "None")\
+                    else "option subnet-mask %s;\n%s" %(bd_select('c_subnet_mask','admconf'),recebe1)
+                    
+    arquivo += '' if(bd_select('c_domain_name','admconf') == "None")\
+                    else 'option nis-domain "%s";\n%s' %(bd_select('c_domain_name','admconf'),recebe1) 
+    
+    arquivo += '' if(bd_select('c_domain_name','admconf') == "None")\
+                    else 'option domain-name "%s";\n%s' %(bd_select('c_domain_name','admconf'),recebe1)  
+                    
+    arquivo += '' if(bd_select('c_name_servers','admconf') == "None")\
+                    else 'option domain-name-servers %s;\n%s' %(bd_select('c_name_servers','admconf'),recebe1) 
+                    
+    arquivo += '' if(bd_select('c_netbios_name','admconf') == "None")\
+                    else 'option netbios-name-servers %s;\n%s' %(bd_select('c_netbios_name','admconf'),recebe1)
+    
+    arquivo += '' if(bd_select('c_offset','admconf') == "None")\
+                    else 'option time-offset %s\n%s' %(bd_select('c_offset','admconf'),recebe1)                 
+                    
+    arquivo += '' if(bd_select('c_ntp','admconf') == "None")\
+                    else 'option ntp-servers %s;\n%s' %(bd_select('c_ntp','admconf'),recebe1)               
+                    
+    arquivo += '' if(bd_select('c_proxy_url','admconf') == "None")\
+                    else 'option wpad-url "%s";\n%s' %(bd_select('c_proxy_url','admconf'),recebe1)                
+                    
+    arquivo += '' if(bd_select('c_pxe_path','admconf') == "None")\
+                    else 'option root-path "%s";\n%s' %(bd_select('c_pxe_path','admconf'),recebe1) 
+    
+    arquivo += '' if(bd_select('c_pxe_server','admconf') == "None")\
+                    else 'next-server %s;\n%s' %(bd_select('c_pxe_server','admconf'),recebe1)
+                    
+    arquivo += '' if(bd_select('c_pxe_filename','admconf') == "None")\
+                    else 'filename "%s";\n%s' %(bd_select('c_pxe_filename','admconf'),recebe1)
+    
+    arquivo += '' if(bd_select('c_range_inicio','admconf') == "None")\
+                    else 'range dynamic-bootp %s' %(bd_select('c_range_inicio','admconf'))
+    
+    arquivo += '' if(bd_select('c_range_fim','admconf') == "None")\
+                    else ' %s;\n%s' %(bd_select('c_range_fim','admconf'),recebe1)
+    
+    arquivo += '' if(bd_select('c_deft_lease_time','admconf') == "None")\
+                    else 'default-lease-time %s;\n%s' %(bd_select('c_deft_lease_time','admconf'),recebe1)
+                    
+    arquivo += '' if(bd_select('c_max_lease_time','admconf') == "None")\
+                    else 'max-lease-time %s;\n}\n%s' %(bd_select('c_max_lease_time','admconf'),recebe1)                    
+    
+    arquivo += "#STATIC\n%s" %recebe1
+    arquivo += bd_cen_dhip(recebe2,recebe3) + '\n'
+
+    return arquivo
